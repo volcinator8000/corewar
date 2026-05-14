@@ -14,8 +14,6 @@ static void check_liveness(vm_t *vm)
     remove_dead_processes(vm);
     if (vm->live_count >= NBR_LIVE)
         vm->cycle_to_die -= CYCLE_DELTA;
-    if (vm->cycle_to_die <= 0)
-        vm->cycle_to_die = 0;
     vm->live_count = 0;
     vm->checks = 0;
 }
