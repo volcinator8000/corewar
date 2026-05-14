@@ -43,9 +43,9 @@ static void tick_process(vm_t *vm, process_t *cur)
         return;
     }
     op_byte = vm->arena[cur->pc % MEM_SIZE];
+    cur->current_op = op_byte;
     if (op_byte >= 1 && op_byte <= 16)
         cur->wait_cycles = op_tab[op_byte].nbr_cycles - 1;
-    cur->current_op = op_byte;
     execute_process(vm, cur);
 }
 
