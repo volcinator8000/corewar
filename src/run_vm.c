@@ -53,9 +53,16 @@ static void tick_process(vm_t *vm, process_t *cur)
 static void run_one_cycle(vm_t *vm)
 {
     process_t *cur = vm->processes;
+    process_t *snapshot_end = NULL;
+    process_t *tmp = vm->processes;
 
+    while (tmp && tmp->next)
+        tmp = tmp->next;
+    snapshot_end = tmp;
     while (cur) {
         tick_process(vm, cur);
+        if (cur == snapshot_end)
+            break;
         cur = cur->next;
     }
     vm->cycle++;

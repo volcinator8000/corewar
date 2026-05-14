@@ -24,11 +24,16 @@ static void announce_live(vm_t *vm, int player_id)
 void op_live(vm_t *vm, process_t *proc)
 {
     int player_id = read_mem_int(vm, proc->pc + 1, DIR_SIZE);
+    int abs_id;
 
+    if (player_id < 0)
+        abs_id = -player_id;
+    else
+        abs_id = player_id;
     proc->live_count++;
     vm->live_count++;
-    vm->last_live = player_id;
-    announce_live(vm, player_id);
+    vm->last_live = abs_id;
+    announce_live(vm, abs_id);
     proc->pc = (proc->pc + 5) % MEM_SIZE;
 }
 
@@ -67,6 +72,7 @@ void op_fork(vm_t *vm, process_t *proc)
     }
     copy_registers(child, proc);
     child->carry = proc->carry;
+    child->wait_cycles = 1;
     vm->proc_id_counter++;
     add_process(vm, child);
     proc->pc = (proc->pc + 3) % MEM_SIZE;
@@ -85,6 +91,7 @@ void op_lfork(vm_t *vm, process_t *proc)
     }
     copy_registers(child, proc);
     child->carry = proc->carry;
+    child->wait_cycles = 1;
     vm->proc_id_counter++;
     add_process(vm, child);
     proc->pc = (proc->pc + 3) % MEM_SIZE;
