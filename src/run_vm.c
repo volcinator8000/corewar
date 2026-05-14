@@ -7,6 +7,8 @@
 
 #include "my.h"
 
+#define MAX_CYCLES 100000000
+
 static void check_liveness(vm_t *vm)
 {
     if (vm->checks < vm->cycle_to_die)
@@ -23,6 +25,10 @@ static void announce_winner(vm_t *vm)
     int winner = vm->last_live;
     int i = 0;
 
+    if (winner <= 0) {
+        mini_printf("No winner.\n");
+        return;
+    }
     while (i < vm->nb_players) {
         if (vm->players[i].number == winner) {
             mini_printf("The player %d (%s) has won.\n",
@@ -31,7 +37,7 @@ static void announce_winner(vm_t *vm)
         }
         i++;
     }
-    mini_printf("Player %d has won.\n", winner);
+    mini_printf("No winner.\n");
 }
 
 static void tick_process(vm_t *vm, process_t *cur)
@@ -75,7 +81,7 @@ static int should_dump(vm_t *vm)
 
 void run_vm(vm_t *vm)
 {
-    while (vm->nb_processes > 0) {
+    while (vm->nb_processes > 0 && vm->cycle < MAX_CYCLES) {
         run_one_cycle(vm);
         if (should_dump(vm)) {
             dump_state(vm);
