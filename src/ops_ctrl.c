@@ -7,15 +7,15 @@
 
 #include "my.h"
 
-static void announce_live(vm_t *vm, int abs_id)
+static void announce_live(vm_t *vm, int player_id)
 {
     int i = 0;
 
     while (i < vm->nb_players) {
-        if (vm->players[i].number == abs_id) {
+        if (vm->players[i].number == player_id) {
             vm->players[i].last_live = vm->cycle;
             mini_printf("The player %d (%s) is alive.\n",
-                abs_id, vm->players[i].name);
+                player_id, vm->players[i].name);
         }
         i++;
     }
@@ -24,12 +24,11 @@ static void announce_live(vm_t *vm, int abs_id)
 void op_live(vm_t *vm, process_t *proc)
 {
     int player_id = read_mem_int(vm, proc->pc + 1, DIR_SIZE);
-    int abs_id = -player_id;
 
     proc->live_count++;
     vm->live_count++;
-    vm->last_live = abs_id;
-    announce_live(vm, abs_id);
+    vm->last_live = player_id;
+    announce_live(vm, player_id);
     proc->pc = (proc->pc + 5) % MEM_SIZE;
 }
 
