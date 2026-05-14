@@ -7,33 +7,38 @@
 
 #include "my.h"
 
-static void announce_live(vm_t *vm, int player_id)
+static int find_player(vm_t *vm, int player_id)
 {
     int i = 0;
 
     while (i < vm->nb_players) {
-        if (vm->players[i].number == player_id) {
-            vm->players[i].last_live = vm->cycle;
-            mini_printf("The player %d (%s) is alive.\n",
-                player_id, vm->players[i].name);
-        }
+        if (vm->players[i].number == player_id)
+            return i;
         i++;
     }
+    return -1;
+}
+
+static void do_announce_live(vm_t *vm, int idx)
+{
+    vm->players[idx].last_live = vm->cycle;
+    mini_printf("The player %d (%s) is alive.\n",
+        vm->players[idx].number, vm->players[idx].name);
 }
 
 void op_live(vm_t *vm, process_t *proc)
 {
-    int player_id = read_mem_int(vm, proc->pc + 1, DIR_SIZE);
-    int abs_id;
+    int raw = read_mem_int(vm, proc->pc + 1, DIR_SIZE);
+    int player_id = raw < 0 ? -raw : raw;
+    int idx;
 
-    if (player_id < 0)
-        abs_id = -player_id;
-    else
-        abs_id = player_id;
     proc->live_count++;
     vm->live_count++;
-    vm->last_live = abs_id;
-    announce_live(vm, abs_id);
+    idx = find_player(vm, player_id);
+    if (idx >= 0) {
+        vm->last_live = player_id;
+        do_announce_live(vm, idx);
+    }
     proc->pc = (proc->pc + 5) % MEM_SIZE;
 }
 
