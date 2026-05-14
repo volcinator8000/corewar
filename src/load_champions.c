@@ -23,7 +23,9 @@ static int read_header(int fd, header_t *hdr, char *path)
     hdr->magic = ntohl(hdr->magic);
     hdr->prog_size = ntohl(hdr->prog_size);
     if (hdr->magic != COREWAR_EXEC_MAGIC) {
-        display_error("Error: invalid magic\n");
+        display_error("Error: invalid magic in ");
+        display_error(path);
+        display_error("\n");
         return ERR_CODE;
     }
     return SUCCESS;
@@ -32,42 +34,47 @@ static int read_header(int fd, header_t *hdr, char *path)
 static void assign_load_addresses(vm_t *vm)
 {
     int spacing = MEM_SIZE / vm->nb_players;
+    int i = 0;
 
-    for (int i = 0; i < vm->nb_players; i++) {
+    while (i < vm->nb_players) {
         if (vm->players[i].load_addr == -1)
             vm->players[i].load_addr = (spacing * i) % MEM_SIZE;
+        i++;
     }
-}
-
-static int read_champ_body(int fd, header_t *hdr, uint8_t *buf, char *name)
-{
-    int ret = read(fd, buf, hdr->prog_size);
-
-    if (ret != hdr->prog_size) {
-        display_error("Error: cannot read bytecode of ");
-        display_error(name);
-        display_error("\n");
-        return ERR_CODE;
-    }
-    return SUCCESS;
 }
 
 static int load_one_champion(vm_t *vm, int idx)
 {
     header_t h;
-    int fd = open(vm->players[idx].name, O_RDONLY);
-    int addr = vm->players[idx].load_addr;
+    int fd;
+    int addr;
     uint8_t b[MEM_SIZE];
+    int ret;
+    int i;
 
-    if (fd < 0 || read_header(fd, &h, vm->players[idx].name) != SUCCESS
-        || read_champ_body(fd, &h, b, vm->players[idx].name) != SUCCESS) {
-        if (fd >= 0)
-            close(fd);
+    fd = open(vm->players[idx].name, O_RDONLY);
+    if (fd < 0) {
+        display_error("Error: cannot open ");
+        display_error(vm->players[idx].name);
+        display_error("\n");
         return ERR_CODE;
     }
+    if (read_header(fd, &h, vm->players[idx].name) != SUCCESS) {
+        close(fd);
+        return ERR_CODE;
+    }
+    ret = read(fd, b, h.prog_size);
     close(fd);
-    for (int i = 0; i < h.prog_size; i++)
+    if (ret != h.prog_size) {
+        display_error("Error: cannot read bytecode\n");
+        return ERR_CODE;
+    }
+    addr = vm->players[idx].load_addr;
+    i = 0;
+    while (i < h.prog_size) {
         vm->arena[(addr + i) % MEM_SIZE] = b[i];
+        i++;
+    }
     my_strncpy(vm->players[idx].name, h.prog_name, PROG_NAME_LENGTH);
     my_strncpy(vm->players[idx].comment, h.comment, COMMENT_LENGTH);
     vm->players[idx].prog_size = h.prog_size;
@@ -77,22 +84,27 @@ static int load_one_champion(vm_t *vm, int idx)
 static void create_initial_processes(vm_t *vm)
 {
     process_t *proc;
+    int i = 0;
 
-    for (int i = 0; i < vm->nb_players; i++) {
+    while (i < vm->nb_players) {
         proc = create_process(vm->players[i].load_addr,
             vm->players[i].number, vm->proc_id_counter, vm);
         proc->registers[1] = -vm->players[i].number;
         vm->proc_id_counter++;
         add_process(vm, proc);
+        i++;
     }
 }
 
 int load_champions(vm_t *vm)
 {
+    int i = 0;
+
     assign_load_addresses(vm);
-    for (int i = 0; i < vm->nb_players; i++) {
+    while (i < vm->nb_players) {
         if (load_one_champion(vm, i) != SUCCESS)
             return ERR_CODE;
+        i++;
     }
     create_initial_processes(vm);
     return SUCCESS;
