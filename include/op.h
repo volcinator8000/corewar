@@ -11,6 +11,7 @@
     #define MEM_SIZE (6 * 1024)
     #define IDX_MOD 512
     #define MAX_ARGS_NUMBER 4
+    #define MAX_PROCESSES 1000
 
     #define COMMENT_CHAR '#'
     #define LABEL_CHAR ':'
