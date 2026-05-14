@@ -8,15 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <string.h>
 #include "my.h"
-
-static int swap_endian(int val)
-{
-    return ((val >> 24) & 0x000000FF) | ((val >> 8) & 0x0000FF00) |
-        ((val << 8) & 0x00FF0000) | ((val << 24) & 0xFF000000);
-}
 
 static int read_header(int fd, header_t *hdr, char *path)
 {
@@ -28,12 +20,10 @@ static int read_header(int fd, header_t *hdr, char *path)
         display_error("\n");
         return ERR_CODE;
     }
-    hdr->magic = swap_endian(hdr->magic);
-    hdr->prog_size = swap_endian(hdr->prog_size);
+    hdr->magic = ntohl(hdr->magic);
+    hdr->prog_size = ntohl(hdr->prog_size);
     if (hdr->magic != COREWAR_EXEC_MAGIC) {
-        display_error("Error: invalid magic in ");
-        display_error(path);
-        display_error("\n");
+        display_error("Error: invalid magic\n");
         return ERR_CODE;
     }
     return SUCCESS;

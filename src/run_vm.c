@@ -5,16 +5,17 @@
 ** Main virtual machine loop
 */
 
-#include <stdio.h>
 #include "my.h"
 
 static void check_liveness(vm_t *vm)
 {
-    if (vm->live_count < NBR_LIVE && vm->checks < vm->cycle_to_die)
+    if (vm->checks < vm->cycle_to_die && vm->live_count < NBR_LIVE)
         return;
     remove_dead_processes(vm);
     if (vm->live_count >= NBR_LIVE)
         vm->cycle_to_die -= CYCLE_DELTA;
+    if (vm->cycle_to_die <= 0)
+        vm->cycle_to_die = 0;
     vm->live_count = 0;
     vm->checks = 0;
 }
@@ -76,12 +77,17 @@ static void init_process_waits(vm_t *vm)
     }
 }
 
+static int should_dump(vm_t *vm)
+{
+    return (vm->dump_cycle != -1 && vm->cycle >= vm->dump_cycle);
+}
+
 void run_vm(vm_t *vm)
 {
     init_process_waits(vm);
     while (vm->nb_processes > 0) {
         run_one_cycle(vm);
-        if (vm->dump_cycle != -1 && vm->cycle >= vm->dump_cycle) {
+        if (should_dump(vm)) {
             dump_state(vm);
             return;
         }

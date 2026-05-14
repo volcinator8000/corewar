@@ -6,7 +6,6 @@
 */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include "my.h"
 
 process_t *create_process(int pc, int player_id, int id, vm_t *vm)

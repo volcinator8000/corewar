@@ -5,9 +5,6 @@
 ** parse_args.c
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "my.h"
 
 static void print_usage(int fd)
@@ -16,18 +13,13 @@ static void print_usage(int fd)
         mini_printf("USAGE\n./corewar [-dump nbr_cycle] ");
         mini_printf("[[-n prog_number] [-a load_address] prog_name]...\n");
         mini_printf("DESCRIPTION\n");
-        mini_printf(" -dump nbr_cycle dumps the VM state after nbr_cycle\n");
-        mini_printf(" -n prog_number sets the next program's number\n");
-        mini_printf(" -a load_address sets the next program's load address\n");
+        mini_printf(" -dump nbr_cycle  dumps the VM state after nbr_cycle\n");
+        mini_printf(" -n prog_number   sets the next program's number\n");
+        mini_printf(" -a load_address  sets the next program's load address\n");
+        return;
     }
-    if (fd == 2) {
-        display_error("USAGE\n./corewar [-dump nbr_cycle] ");
-        display_error("[[-n prog_number] [-a load_address] prog_name]...\n");
-        display_error("DESCRIPTION\n");
-        display_error(" -dump nbr_cycle dumps the VM state after nbr_cycle\n");
-        display_error(" -n prog_number sets the next program's number\n");
-        display_error(" -a load_address sets the next program's load address\n");
-    }
+    display_error("USAGE\n./corewar [-dump nbr_cycle] ");
+    display_error("[[-n prog_number] [-a load_address] prog_name]...\n");
 }
 
 static int handle_dump(int i, int ac, char **av, vm_t *vm)
@@ -50,7 +42,7 @@ static int handle_n(int i, int ac, char **av, vm_t *vm)
     }
     nb = my_atoi(av[i + 1]);
     if (nb < 1 || nb > MAX_PLAYERS) {
-        display_error("Error: invalid player number");
+        display_error("Error: invalid player number\n");
         return ERR_CODE;
     }
     vm->players[vm->nb_players].number = nb;

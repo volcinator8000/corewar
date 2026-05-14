@@ -6,7 +6,6 @@
 */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include "my.h"
 
 static void init_vm_defaults(vm_t *vm)

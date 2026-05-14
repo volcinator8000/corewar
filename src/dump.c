@@ -5,7 +5,6 @@
 ** VM state dump for -dump flag
 */
 
-#include <stdio.h>
 #include "my.h"
 
 static void print_player_header(vm_t *vm, process_t *proc)
@@ -26,10 +25,11 @@ static void print_registers(process_t *proc)
     char hexa[9];
 
     while (r <= REG_NUMBER) {
-        mini_printf("r%d:%s\n", r, hexa_converter((unsigned int)proc->registers[r], 8, hexa));
+        mini_printf("r%d:%s\n", r,
+            hexa_converter((unsigned int)proc->registers[r], 8, hexa));
         r++;
     }
-    mini_printf("PC:\n", hexa_converter((unsigned int)proc->pc, 8, hexa));
+    mini_printf("PC:%s\n", hexa_converter((unsigned int)proc->pc, 8, hexa));
     mini_printf("carry:%d\n", proc->carry);
 }
 
@@ -50,9 +50,10 @@ static void dump_memory_row(vm_t *vm, int i)
     char hexa_8[9];
     char hexa_2[3];
 
-    mini_printf("%08X:", hexa_converter(i, 8, hexa_8));
+    mini_printf("%s:", hexa_converter(i, 8, hexa_8));
     while (j < 32 && i + j < MEM_SIZE) {
-        mini_printf("%02X", hexa_converter(vm->arena[i + j], 2, hexa_2));
+        mini_printf("%s",
+            hexa_converter(vm->arena[i + j], 2, hexa_2));
         j++;
     }
     mini_printf("\n");

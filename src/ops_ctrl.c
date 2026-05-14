@@ -5,7 +5,6 @@
 ** Control operations: live, zjmp, fork, lfork, print
 */
 
-#include <stdio.h>
 #include "my.h"
 
 static void announce_live(vm_t *vm, int abs_id)
