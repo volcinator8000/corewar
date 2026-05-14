@@ -9,7 +9,7 @@
 
 static void check_liveness(vm_t *vm)
 {
-    if (vm->checks < vm->cycle_to_die && vm->live_count < NBR_LIVE)
+    if (vm->checks < vm->cycle_to_die)
         return;
     remove_dead_processes(vm);
     if (vm->live_count >= NBR_LIVE)
@@ -64,19 +64,6 @@ static void run_one_cycle(vm_t *vm)
     vm->checks++;
 }
 
-static void init_process_waits(vm_t *vm)
-{
-    process_t *cur = vm->processes;
-    int op_byte;
-
-    while (cur) {
-        op_byte = vm->arena[cur->pc % MEM_SIZE];
-        if (op_byte >= 1 && op_byte <= 16)
-            cur->wait_cycles = op_tab[op_byte].nbr_cycles;
-        cur = cur->next;
-    }
-}
-
 static int should_dump(vm_t *vm)
 {
     return (vm->dump_cycle != -1 && vm->cycle >= vm->dump_cycle);
@@ -84,7 +71,6 @@ static int should_dump(vm_t *vm)
 
 void run_vm(vm_t *vm)
 {
-    init_process_waits(vm);
     while (vm->nb_processes > 0) {
         run_one_cycle(vm);
         if (should_dump(vm)) {
