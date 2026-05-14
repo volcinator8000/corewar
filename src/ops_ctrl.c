@@ -63,38 +63,40 @@ void op_fork(vm_t *vm, process_t *proc)
 {
     int offset = read_mem_int(vm, proc->pc + 1, IND_SIZE);
     int new_pc = (proc->pc + (offset % IDX_MOD) + MEM_SIZE) % MEM_SIZE;
-    process_t *child = create_process(new_pc, proc->player_id,
-        vm->proc_id_counter, vm);
+    process_t *child;
 
-    if (!child) {
-        proc->pc = (proc->pc + 3) % MEM_SIZE;
+    proc->pc = (proc->pc + 3) % MEM_SIZE;
+    if (vm->nb_processes >= MAX_PROCESSES)
         return;
-    }
+    child = create_process(new_pc, proc->player_id,
+        vm->proc_id_counter, vm);
+    if (!child)
+        return;
     copy_registers(child, proc);
     child->carry = proc->carry;
     child->wait_cycles = 1;
     vm->proc_id_counter++;
     add_process(vm, child);
-    proc->pc = (proc->pc + 3) % MEM_SIZE;
 }
 
 void op_lfork(vm_t *vm, process_t *proc)
 {
     int offset = read_mem_int(vm, proc->pc + 1, IND_SIZE);
     int new_pc = (proc->pc + offset + MEM_SIZE) % MEM_SIZE;
-    process_t *child = create_process(new_pc, proc->player_id,
-        vm->proc_id_counter, vm);
+    process_t *child;
 
-    if (!child) {
-        proc->pc = (proc->pc + 3) % MEM_SIZE;
+    proc->pc = (proc->pc + 3) % MEM_SIZE;
+    if (vm->nb_processes >= MAX_PROCESSES)
         return;
-    }
+    child = create_process(new_pc, proc->player_id,
+        vm->proc_id_counter, vm);
+    if (!child)
+        return;
     copy_registers(child, proc);
     child->carry = proc->carry;
     child->wait_cycles = 1;
     vm->proc_id_counter++;
     add_process(vm, child);
-    proc->pc = (proc->pc + 3) % MEM_SIZE;
 }
 
 void op_print(vm_t *vm, process_t *proc)
