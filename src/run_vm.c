@@ -33,6 +33,7 @@ static void announce_winner(vm_t *vm)
         }
         i++;
     }
+    mini_printf("Player %d has won.\n", winner);
 }
 
 static void tick_process(vm_t *vm, process_t *cur)
